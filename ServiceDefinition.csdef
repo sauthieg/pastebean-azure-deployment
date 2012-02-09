@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<ServiceDefinition xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition"
+                   name="WindowsAzureProject">
+
+  <!-- 
+    - In details:
+    -  * Declares a Role named 'Main' that will requires a 'Medium' sized Virtual Machine.
+    -->
+  <WorkerRole name="Main" vmsize="Medium">
+    <Startup>
+      <!-- 
+        - In details:
+        -  * Task executed at VM startup time that will execute the 'startup.cmd' power shell script.
+        -  * Executed from the role's approot folder
+        -  * 'elevated' means run with administrator's priviledges
+        -  * 'background' means a non blocking task
+        -->
+      <Task commandLine="util/.start.cmd startup.cmd" executionContext="elevated" taskType="background"/>
+    </Startup>
+    <Runtime executionContext="elevated">
+    	<EntryPoint> 
+          <!-- 
+            - In details:
+            -  * Task executed at VM startup time checking if the 'java' process is executing
+            -  * Executed from the role's approot folder
+            -  * Useful for Azure's management portal to know the state of the application
+            -->
+    		<ProgramEntryPoint commandLine="run.cmd" setReadyOnProcessStart="true"/>
+    	</EntryPoint>  
+    </Runtime>
+    <Imports>
+      <!-- 
+        - In details:
+        -  * Enable kind of plugins for this Role
+        -  * Remote* modules are enabling RDP access to the Role
+        -->
+  	  <Import moduleName="RemoteAccess"/> 
+  	  <Import moduleName="RemoteForwarder"/>
+    </Imports>
+    <Endpoints>
+      <!-- 
+        - In details:
+        -  * Open a public port (accessible from the internet)
+        -  * Map it to an internal port (here 9000 is the JOnAS HTTP Connector default's port)
+        -->
+      <InputEndpoint localPort="9000" name="http" port="80" protocol="http"/>
+    </Endpoints>
+  </WorkerRole>
+</ServiceDefinition>
